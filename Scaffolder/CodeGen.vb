@@ -1,107 +1,218 @@
-﻿Imports Microsoft.SqlServer
-Imports System.Data.SqlClient
-Imports System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel
+﻿Imports System.Data.SqlClient
+Imports System.Text
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports System.Xml
 
 Public Class CodeGen
-    Private myConn As SqlConnection
-    Private myCmd As SqlCommand
-    Private myReader As SqlDataReader
+    Private aspxCode As String
 
-    Private liTables As New List(Of String)
-    Private Server As String = String.Empty
-    Private DB As String = String.Empty
-    Private Username As String = String.Empty
-    Private Pass As String = String.Empty
-    Private _IS As Boolean = False
-
-    Private ReadOnly qSQLTV As String = "SELECT [name] FROM sys.objects o WHERE [type] IN ('U','V') order by [type] asc, [name] asc"
-
-    Private Sub RichTextBox1_TextChanged(sender As Object, e As EventArgs) Handles RichTextBox1.TextChanged
-        RichTextBox1.Text = ConvertRtfToText()
-    End Sub
-    Private Function ConvertRtfToText() As String
+    Private Function ConvertRtfToText(ByVal rtb As RichTextBox) As String
         Return New RichTextBox() With {
-            .Rtf = Me.RichTextBox1.Rtf
+            .Rtf = rtb.Rtf
         }.Text
     End Function
 
-    Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs) Handles TextBox1.TextChanged
-        ListBox1.Items.Clear()
-        For Each str As String In liTables
-            If str.ToLower.Contains(TextBox1.Text.ToLower) Then
-                ListBox1.Items.Add(str)
+    Private Sub rtbStringWS_TextChanged(sender As Object, e As EventArgs) Handles rtbStringWS.TextChanged
+        rtbStringWS.Text = ConvertRtfToText(rtbStringWS)
+        rtbStringWS.SelectionStart = rtbStringWS.Text.Length
+        rtbStringWS.Focus()
+        If rtbStringWS.Text.Contains("H") Then
+            txtHeaderTName.Enabled = True
+        Else
+            txtHeaderTName.Enabled = False
+        End If
+
+        If rtbStringWS.Text.Contains("D") Then
+            txtDetailTName.Enabled = True
+        Else
+            txtDetailTName.Enabled = False
+        End If
+    End Sub
+
+    Private Function FindSeparator(ByVal str As String) As Char
+        Dim _return As Char = String.Empty
+        Dim counts = From n In str Group n By n Into Group
+                     Select n, Count = Group.Count()
+                     Order By Count Descending
+
+        For Each c In counts
+            _return = c.n
+            Exit For
+        Next
+        Return _return
+    End Function
+
+    Private Sub CodeGen_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ControlTabs()
+        txtOutputFolder.Enabled = False
+    End Sub
+
+    Private Sub InitiateControlIWL()
+        txtLegend.Text = "Field Name;Control"
+        Label5.Text = "Field List" & vbLf & "lbl = Label" & vbLf & "txt = TextBox" & vbLf & "ddl = Dropdown List" & vbLf & "dt = Date" & vbLf & "dr = Date Range" & vbLf & "drc = Date Range with Checkbox" & vbLf & "ph = Placeholder Only" & vbLf & "b = Button" & vbLf
+        TextBox1.Text = "Without Control = Label" & vbLf & "crud;veaid"
+        Label6.Text = "Grid Column " & vbLf & "v = View" & vbLf & "e = Edit" & vbLf & "a = Active" & vbLf & "i = Inactive " & vbLf & "d = Delete"
+
+        txtIWLFileName.Text = "FrmMasterKPI"
+        txtIWLPageTitle.Text = "Master Data KPI STNK Tracking"
+    End Sub
+
+    Private Sub InitiateControlNJWS()
+        txtHeaderTName.Enabled = False
+        txtDetailTName.Enabled = False
+    End Sub
+
+    Private Sub RichTextBox1_TextChanged(sender As Object, e As EventArgs) ' Handles RichTextBox1.TextChanged
+        RichTextBox1.Text = ConvertRtfToText(RichTextBox1)
+        RichTextBox1.SelectionStart = RichTextBox1.Text.Length
+        RichTextBox1.Focus()
+    End Sub
+
+    Private Sub btnGenerate_Click(sender As Object, e As EventArgs) Handles btnGenerate.Click
+        If Not CheckedOutput() Then
+            MessageBox.Show("Fill Output Folder")
+            Exit Sub
+        End If
+
+        Select Case TabControl1.SelectedTab.Name
+            Case "InputWithList"
+                GeneratePageInputWithList()
+            Case "InputWithoutList"
+            Case "NonJsonWS"
+            Case "JSONWS"
+        End Select
+    End Sub
+    Private Function CheckedOutput() As Boolean
+        Return txtOutputFolder.Text.Trim.Length > 0
+    End Function
+
+    Private Sub ControlTabs()
+        Select Case TabControl1.SelectedTab.Name
+            Case "InputWithList"
+                InitiateControlIWL()
+            Case "InputWithoutList"
+            Case "NonJsonWS"
+                InitiateControlNJWS()
+            Case "JSONWS"
+        End Select
+        txtOutputFolder.Text = "C:\Users\azadmin\Documents\Test"
+    End Sub
+
+    Private Sub TabControl1_TabIndexChanged(sender As Object, e As EventArgs) Handles TabControl1.TabIndexChanged
+        ControlTabs()
+    End Sub
+
+    Private Sub GeneratePageInputWithList()
+        GenerateASPXPageInputWithList()
+        'GenerateVBCodeInputWithList()
+        MessageBox.Show("Code Ready to Copy", "Alert")
+    End Sub
+
+    Private Sub GenerateVBCodeInputWithList()
+        Throw New NotImplementedException()
+    End Sub
+
+    Private Sub GenerateASPXPageInputWithList()
+        Dim ConStr As New ConStrInputWithList()
+        Dim BaseStr As String = ConStr.InputWithList
+        Dim buildCtrl As String = String.Empty
+        Dim buildGridColumn As String = String.Empty
+        Dim buildGridColumnButtons As Boolean = False
+        Dim buildButton As String = String.Empty
+        Dim buildButtonFlag As Boolean = False
+
+        For Each fieldNames In RichTextBox1.Lines
+            Dim fieldName As String = If(fieldNames.Split(";")(0), "")
+            Dim fieldCtrl As String = If(fieldNames.Split(";")(1), "")
+            Dim ctrlStr As String = String.Empty
+            Select Case fieldCtrl
+                Case "lbl"
+                    ctrlStr = ConStr.InputFieldLabel
+                Case "txt"
+                    ctrlStr = ConStr.InputFieldTextBox
+                Case "ddl"
+                    ctrlStr = ConStr.InputFieldDDL
+                Case "dt"
+                    ctrlStr = ConStr.InputFieldDate
+                Case "dr"
+                    ctrlStr = ConStr.InputFieldDateFromToWithoutCheck
+                Case "drc"
+                    ctrlStr = ConStr.InputFieldDateFromToWithCheck
+                Case "ph"
+                    ctrlStr = ConStr.InputFieldPlaceHolderOnly
+                Case "b"
+                    buildButtonFlag = True
+                    FormatStringCtrl(buildButton, ConStr.InputFieldButtons, fieldName, fieldName.Replace(" ", ""))
+                    Continue For
+            End Select
+            FormatStringCtrl(buildCtrl, ctrlStr, fieldName, fieldName.Replace(" ", ""))
+        Next
+
+        If buildButtonFlag Then
+            buildCtrl &= String.Format(ConStr.InputFieldButtonPlaceHolder, buildButton)
+        End If
+
+        Dim ctrlStrCol As String = String.Empty
+        For Each gridCol In RichTextBox2.Lines
+            If gridCol.Split(";").Length = 1 Then
+                FormatStringCtrl(buildGridColumn, ConStr.GridColumn, gridCol, gridCol.Replace(" ", ""))
+            Else
+                Dim colName As String = gridCol.Split(";")(0)
+                Dim btnType As Char() = gridCol.Split(";")(1).ToLower.ToCharArray()
+                For Each ch As Char In btnType
+                    Select Case ch
+                        Case "v"
+                            buildGridColumnButtons = True
+                            ctrlStrCol &= ConStr.GridButtonView
+                        Case "e"
+                            buildGridColumnButtons = True
+                            ctrlStrCol &= ConStr.GridButtonEdit
+                        Case "a"
+                            buildGridColumnButtons = True
+                            ctrlStrCol &= ConStr.GridButtonActive
+                        Case "i"
+                            buildGridColumnButtons = True
+                            ctrlStrCol &= ConStr.GridButtonInactive
+                        Case "d"
+                            buildGridColumnButtons = True
+                            ctrlStrCol &= ConStr.GridButtonDelete
+                    End Select
+                Next
             End If
         Next
-    End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        LoadConfig()
-
-        myConn = New SqlConnection("Server=" & Server & ";Database=" & DB & ";User Id=" & Username & ";Password=" & Pass & ";")
-        myCmd = myConn.CreateCommand
-        myCmd.CommandText = qSQLTV
-
-        myConn.Open()
-        myReader = myCmd.ExecuteReader()
-        Do While myReader.Read()
-            Try
-                liTables.Add(myReader.GetString(0))
-            Catch ex As Exception
-
-            End Try
-        Loop
-        myReader.Close()
-        myConn.Close()
-
-        liTables.ForEach(Sub(x) ListBox1.Items.Add(x))
-    End Sub
-
-    Private Sub LoadConfig()
-        Dim doc As New XmlDocument
-        doc.LoadXml(RichTextBox1.Text.ToString())
-        Try
-            For Each detail As XmlElement In doc.DocumentElement.GetElementsByTagName("parameters")
-                For Each subdetail As XmlElement In detail.GetElementsByTagName("parameter")
-                    Dim name As String = GetAttibuteValue(subdetail, "name")
-                    Dim value As String = GetAttibuteValue(subdetail, "value")
-                    Select Case name
-                        Case "database"
-                            DB = value
-                        Case "password"
-                            Pass = value
-                        Case "server"
-                            Server = value
-                        Case "uid"
-                            Username = value
-                        Case "Integrated Security"
-                            _IS = CBool(value)
-                    End Select
-                Next subdetail
-            Next detail
-        Catch ex As Exception
-            MessageBox.Show("Error : " & ex.Message)
-        End Try
-    End Sub
-
-    Private Function GetAttibuteValue(ByVal node As XmlNode, ByVal attibutename As String) As String
-        Dim ret As String = String.Empty
-        If node IsNot Nothing AndAlso node.Attributes IsNot Nothing Then
-            Dim attrib As XmlNode = node.Attributes.GetNamedItem(attibutename)
-            If attrib IsNot Nothing Then
-                ret = attrib.Value
-            End If
+        If buildGridColumnButtons Then
+            buildGridColumn &= String.Format(ConStr.GridButtonPlaceHolder, ctrlStrCol)
         End If
-        Return ret
-    End Function
 
-    Private Function CheckedOutput() As Boolean
-        Return TextBox1.Text.Trim.Length > 0
-    End Function
+        aspxCode = String.Format(BaseStr, txtIWLFileName.Text, txtIWLPageTitle.Text, buildCtrl, buildGridColumn, ConStr.JSFooter)
+    End Sub
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+    Private Sub FormatStringCtrl(ByRef buildCtrl As String, ByVal ctrlStr As String, ByVal FieldName As String, ByVal FieldID As String)
+        If ctrlStr.Contains("{1}") Then
+            buildCtrl &= String.Format(ctrlStr, FieldName, FieldID)
+        Else
+            buildCtrl &= String.Format(ctrlStr, FieldName)
+        End If
+    End Sub
+
+    Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
         If (FolderBrowserDialog1.ShowDialog() = DialogResult.OK) Then
-            TextBox2.Text = FolderBrowserDialog1.SelectedPath
+            txtOutputFolder.Text = FolderBrowserDialog1.SelectedPath
         End If
+    End Sub
+
+    Private Sub LinkLabel1_MouseClick(sender As Object, e As MouseEventArgs) Handles LinkLabel1.MouseClick
+        Clipboard.SetText(aspxCode)
+        MessageBox.Show("Code Copied to Clipboard", "Alert")
+    End Sub
+
+    Private Sub LinkLabel2_MouseClick(sender As Object, e As MouseEventArgs) Handles LinkLabel2.MouseClick
+        'MessageBox.Show("Code Copied to Clipboard", "Alert")
+        MessageBox.Show("Not Yet Implemented", "Alert")
+    End Sub
+
+    Private Sub LinkLabel3_MouseClick(sender As Object, e As MouseEventArgs) Handles LinkLabel3.MouseClick
+        MessageBox.Show("Not Yet Implemented", "Alert")
     End Sub
 End Class
