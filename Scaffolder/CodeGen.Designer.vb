@@ -48,7 +48,6 @@ Partial Class CodeGen
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.txtDetailTName = New System.Windows.Forms.TextBox()
         Me.Label4 = New System.Windows.Forms.Label()
-        Me.CheckedListBox1 = New System.Windows.Forms.CheckedListBox()
         Me.txtHeaderTName = New System.Windows.Forms.TextBox()
         Me.Label3 = New System.Windows.Forms.Label()
         Me.txtParserName = New System.Windows.Forms.TextBox()
@@ -288,7 +287,6 @@ Partial Class CodeGen
         '
         Me.GroupBox5.Controls.Add(Me.txtDetailTName)
         Me.GroupBox5.Controls.Add(Me.Label4)
-        Me.GroupBox5.Controls.Add(Me.CheckedListBox1)
         Me.GroupBox5.Controls.Add(Me.txtHeaderTName)
         Me.GroupBox5.Controls.Add(Me.Label3)
         Me.GroupBox5.Controls.Add(Me.txtParserName)
@@ -296,7 +294,7 @@ Partial Class CodeGen
         Me.GroupBox5.Controls.Add(Me.rtbStringWS)
         Me.GroupBox5.Location = New System.Drawing.Point(6, 6)
         Me.GroupBox5.Name = "GroupBox5"
-        Me.GroupBox5.Size = New System.Drawing.Size(545, 278)
+        Me.GroupBox5.Size = New System.Drawing.Size(489, 278)
         Me.GroupBox5.TabIndex = 5
         Me.GroupBox5.TabStop = False
         Me.GroupBox5.Text = "WS String"
@@ -305,7 +303,7 @@ Partial Class CodeGen
         '
         Me.txtDetailTName.Location = New System.Drawing.Point(115, 149)
         Me.txtDetailTName.Name = "txtDetailTName"
-        Me.txtDetailTName.Size = New System.Drawing.Size(100, 20)
+        Me.txtDetailTName.Size = New System.Drawing.Size(144, 20)
         Me.txtDetailTName.TabIndex = 7
         '
         'Label4
@@ -317,20 +315,11 @@ Partial Class CodeGen
         Me.Label4.TabIndex = 6
         Me.Label4.Text = "Detail Table Name"
         '
-        'CheckedListBox1
-        '
-        Me.CheckedListBox1.FormattingEnabled = True
-        Me.CheckedListBox1.Location = New System.Drawing.Point(6, 176)
-        Me.CheckedListBox1.Name = "CheckedListBox1"
-        Me.CheckedListBox1.Size = New System.Drawing.Size(120, 94)
-        Me.CheckedListBox1.TabIndex = 5
-        Me.CheckedListBox1.Visible = False
-        '
         'txtHeaderTName
         '
         Me.txtHeaderTName.Location = New System.Drawing.Point(115, 123)
         Me.txtHeaderTName.Name = "txtHeaderTName"
-        Me.txtHeaderTName.Size = New System.Drawing.Size(100, 20)
+        Me.txtHeaderTName.Size = New System.Drawing.Size(144, 20)
         Me.txtHeaderTName.TabIndex = 4
         '
         'Label3
@@ -346,7 +335,7 @@ Partial Class CodeGen
         '
         Me.txtParserName.Location = New System.Drawing.Point(115, 97)
         Me.txtParserName.Name = "txtParserName"
-        Me.txtParserName.Size = New System.Drawing.Size(100, 20)
+        Me.txtParserName.Size = New System.Drawing.Size(144, 20)
         Me.txtParserName.TabIndex = 2
         '
         'Label2
@@ -362,7 +351,7 @@ Partial Class CodeGen
         '
         Me.rtbStringWS.Location = New System.Drawing.Point(6, 17)
         Me.rtbStringWS.Name = "rtbStringWS"
-        Me.rtbStringWS.Size = New System.Drawing.Size(527, 74)
+        Me.rtbStringWS.Size = New System.Drawing.Size(477, 74)
         Me.rtbStringWS.TabIndex = 0
         Me.rtbStringWS.Text = ""
         '
@@ -458,7 +447,6 @@ Partial Class CodeGen
     Friend WithEvents btnGenerate As Button
     Friend WithEvents txtDetailTName As TextBox
     Friend WithEvents Label4 As Label
-    Friend WithEvents CheckedListBox1 As CheckedListBox
     Friend WithEvents txtHeaderTName As TextBox
     Friend WithEvents Label3 As Label
     Friend WithEvents txtParserName As TextBox

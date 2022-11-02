@@ -218,8 +218,8 @@
 #End Region
 
 #Region "VB"
-    '0=FileName, 1=FieldControlDefault, 2=ColumnControlDeclaration, 3=CrudGrid
-    Public BaseVB As String = "Imports KTB.DNet.Domain
+    '0=FileName, 1=FieldControlDefault, 2=ColumnControlDeclaration, 3=CrudGrid, 4=ButtonHandler, 5=ItemCommand
+    Public VBInputWithList As String = "Imports KTB.DNet.Domain
 Imports KTB.DNet.Domain.Search
 Imports KTB.DNet.Utility
 Imports KTB.DNet.BusinessFacade.Helper
@@ -303,36 +303,11 @@ Public Class {0}
         Return crit
     End Function
 
-    Protected Sub btnBaru_Click(sender As Object, e As EventArgs) Handles btnBaru.Click
-
-    End Sub
-
-    Protected Sub btnSimpan_Click(sender As Object, e As EventArgs) Handles btnSimpan.Click
-
-    End Sub
-
-    Protected Sub btnCari_Click(sender As Object, e As EventArgs) Handles btnCari.Click
-
-    End Sub
-
-    Protected Sub btnKembali_Click(sender As Object, e As EventArgs) Handles btnKembali.Click
-
-    End Sub
-
     Protected Sub dgList_ItemDataBound(sender As Object, e As DataGridItemEventArgs) Handles dgList.ItemDataBound
         Try
             If Not e.Item.DataItem Is Nothing Then
             {2}
             End If
-        Catch ex As Exception
-            MessageBox.Show(ex.Message)
-        End Try
-    End Sub
-
-    Protected Sub dgList_ItemCommand(source As Object, e As DataGridCommandEventArgs) Handles dgList.ItemCommand
-        Try
-            Dim id As Integer = CInt(e.Item.Cells(0).Text)
-            {3}
         Catch ex As Exception
             MessageBox.Show(ex.Message)
         End Try
@@ -345,6 +320,26 @@ Public Class {0}
         Catch ex As Exception
         End Try
     End Sub
+    {4}
+    {5}
 End Class"
+    '0=ButtonName
+    Public ButtonHandlerStr As String = "
+Protected Sub btn{0}_Click(sender As Object, e As EventArgs) Handles btn{0}.Click
+End Sub"
+    '0=DropdownControl
+    Public BindDDLPlaceHolder As String = "
+    Private Sub BindDDLJenis(ByVal ddlJenis As DropDownList)
+        {0}
+    End Sub
+"
+    '0=DropdownID
+    Public BindDDLControl As String = "
+        With {0}.Items
+            .Clear()
+            .Add(New ListItem(""Silahkan Pilih"", ""-1""))
+        End With
+"
+
 #End Region
 End Class
