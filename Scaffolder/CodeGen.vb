@@ -4,6 +4,10 @@ Imports System.Reflection
 Imports System.Text
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports System.Xml
+Imports Newtonsoft
+Imports Newtonsoft.Json
+Imports Newtonsoft.Json.Linq
+Imports Newtonsoft.Json.Schema
 
 Public Class CodeGen
     Private aspxCode As String
@@ -21,7 +25,7 @@ Public Class CodeGen
     Const INDICATOR_DETAIL_CHILD As String = "DD"
 
     Private Sub CodeGen_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        TabControl1.SelectedIndex = 2
+        TabControl1.SelectedIndex = 3
         ControlTabs()
         txtOutputFolder.Enabled = False
     End Sub
@@ -58,6 +62,7 @@ Public Class CodeGen
             Case "NonJsonWS"
                 GenerateNJWS()
             Case "JSONWS"
+                GenerateJWS()
         End Select
     End Sub
 
@@ -81,6 +86,7 @@ Public Class CodeGen
             Case "NonJsonWS"
                 InitiateControlNJWS()
             Case "JSONWS"
+                InitiateControlJWS()
         End Select
         txtOutputFolder.Text = "C:\Users\azadmin\Documents\Test"
         liControl = New List(Of String)
@@ -97,13 +103,68 @@ Public Class CodeGen
         End If
     End Sub
 
-#Region "Non JSON WS"
-    Private Sub rtbStringWS_TextChanged(sender As Object, e As EventArgs) Handles rtbStringWS.TextChanged
-        rtbStringWS.Text = ConvertRtfToText(rtbStringWS)
-        rtbStringWS.SelectionStart = rtbStringWS.Text.Length
-        rtbStringWS.Focus()
+    Private Sub rtbStringWS_TextChanged(sender As Object, e As EventArgs) Handles rtbStringWS.TextChanged, rtbJsonString.TextChanged
+        sender.Text = ConvertRtfToText(sender)
+        sender.SelectionStart = sender.Text.Length
+        sender.Focus()
     End Sub
 
+#Region "JSON WS"
+    Private Sub InitiateControlJWS()
+        'rtbJsonString.Text = "[{""SONumber"":""7580072892"",""Detail"":[{""PartNumber"":""4250D596"",""PartName"":""WHEEL,DISC 18"",""Qty"":""1"",""Reason"":""Z9""}]},{""SONumber"":""7580072893"",""Detail"":[{""PartNumber"":""4250D593"",""PartName"":""WHEEL,DISC 19"",""Qty"":""3"",""Reason"":""Z7""}]"
+        rtbJsonString.Text = "{""sonumber"":""7580072892"",""detail"":[{""partnumber"":""4250d596"",""partname"":""wheel,disc 18"",""qty"":""1"",""reason"":""z9""}]}"
+        'rtbJsonString.Text = "{""SONumber"":""7580072892"",""Detail"":[""4250D596"",""WHEEL,DISC 18"",""Z9""]}"
+        txtJsonKey.Text = "SOCANCEL"
+        txtJsonParserName.Text = "SOCancelJsonParser"
+        txtJsonObjectName.Text = "SOCancelJson"
+        LinkLabel1.Visible = False
+        LinkLabel2.Visible = True
+    End Sub
+
+    Private Sub GenerateJWS()
+        Dim ConStr As New ConStrJSONWS()
+        Dim a = JsonConvert.DeserializeObject(Of Object)(rtbJsonString.Text)
+        If a.GetType() = GetType(JObject) Then
+            Dim b As JObject = a
+            Dim _RootDictionary As New Dictionary(Of String, Object)
+            Dim _ChildDictionary As New Dictionary(Of String, String)
+            For Each item As JProperty In b.Properties
+                _RootDictionary.Add(item.Name, item.Value.GetType().ToString())
+            Next
+
+            ParseChild(_RootDictionary, _ChildDictionary)
+        Else
+
+        End If
+    End Sub
+
+    Private Sub ParseChild(_rootDictionary As Dictionary(Of String, Object), ByRef _childDictionary As Dictionary(Of String, String))
+
+        For Each item As KeyValuePair(Of String, Object) In _rootDictionary
+            Select Case item.Value
+                Case GetType(JArray).ToString()
+                    For Each child As String In item.Value
+                        If child = GetType(JObject).ToString() Then 'Schema 2
+                            If child.Count > 0 Then
+                                For Each childProp As JProperty In child
+                                Next
+                            End If
+                        Else 'Schema 3 --- JValue
+                            '_ChildDictionary.Add(child.name
+                            Dim qwe = ""
+                        End If
+                        Dim debugs = ""
+                    Next
+
+
+                Case GetType(JValue).ToString()
+
+            End Select
+        Next
+    End Sub
+#End Region
+
+#Region "Non JSON WS"
     Private Sub InitiateControlNJWS()
         rtbStringWS.Text = "K;MasterAccrued_20210921210013\nH;BussinessAreaCode;AccKey;Description;Type;CostCenterCode;InternalOrderCode\nD;BussinessAreaCodeASD;AccKeyASD;DescriptionASD;TypeASD;CostCenterCodeASD;InternalOrderCodeASD\n"
         txtParserName.Text = "MasterAccruedParser"
