@@ -43,7 +43,6 @@ Partial Class CodeGen
         Me.txtIWLFileName = New System.Windows.Forms.TextBox()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.InputWithoutList = New System.Windows.Forms.TabPage()
         Me.NonJsonWS = New System.Windows.Forms.TabPage()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.txtDetailTName = New System.Windows.Forms.TextBox()
@@ -54,18 +53,18 @@ Partial Class CodeGen
         Me.Label2 = New System.Windows.Forms.Label()
         Me.rtbStringWS = New System.Windows.Forms.RichTextBox()
         Me.JSONWS = New System.Windows.Forms.TabPage()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.txtJsonKey = New System.Windows.Forms.TextBox()
+        Me.GroupBox7 = New System.Windows.Forms.GroupBox()
         Me.rtbJsonString = New System.Windows.Forms.RichTextBox()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.txtJsonKey = New System.Windows.Forms.TextBox()
+        Me.txtJsonObjectName = New System.Windows.Forms.TextBox()
+        Me.Label9 = New System.Windows.Forms.Label()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.txtJsonParserName = New System.Windows.Forms.TextBox()
         Me.btnGenerate = New System.Windows.Forms.Button()
         Me.LinkLabel1 = New System.Windows.Forms.LinkLabel()
         Me.LinkLabel2 = New System.Windows.Forms.LinkLabel()
         Me.LinkLabel3 = New System.Windows.Forms.LinkLabel()
-        Me.Label10 = New System.Windows.Forms.Label()
-        Me.txtJsonParserName = New System.Windows.Forms.TextBox()
-        Me.Label11 = New System.Windows.Forms.Label()
-        Me.txtJsonObjectName = New System.Windows.Forms.TextBox()
-        Me.GroupBox7 = New System.Windows.Forms.GroupBox()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox4.SuspendLayout()
         Me.TabControl1.SuspendLayout()
@@ -129,7 +128,6 @@ Partial Class CodeGen
         'TabControl1
         '
         Me.TabControl1.Controls.Add(Me.InputWithList)
-        Me.TabControl1.Controls.Add(Me.InputWithoutList)
         Me.TabControl1.Controls.Add(Me.NonJsonWS)
         Me.TabControl1.Controls.Add(Me.JSONWS)
         Me.TabControl1.Dock = System.Windows.Forms.DockStyle.Fill
@@ -152,7 +150,7 @@ Partial Class CodeGen
         Me.InputWithList.Name = "InputWithList"
         Me.InputWithList.Size = New System.Drawing.Size(501, 290)
         Me.InputWithList.TabIndex = 2
-        Me.InputWithList.Text = "Input With List"
+        Me.InputWithList.Text = "Input"
         Me.InputWithList.UseVisualStyleBackColor = True
         '
         'GroupBox6
@@ -273,15 +271,6 @@ Partial Class CodeGen
         Me.Label8.TabIndex = 8
         Me.Label8.Text = "File Name without Ext"
         '
-        'InputWithoutList
-        '
-        Me.InputWithoutList.Location = New System.Drawing.Point(4, 22)
-        Me.InputWithoutList.Name = "InputWithoutList"
-        Me.InputWithoutList.Size = New System.Drawing.Size(501, 290)
-        Me.InputWithoutList.TabIndex = 3
-        Me.InputWithoutList.Text = "Input Without List"
-        Me.InputWithoutList.UseVisualStyleBackColor = True
-        '
         'NonJsonWS
         '
         Me.NonJsonWS.Controls.Add(Me.GroupBox5)
@@ -375,6 +364,53 @@ Partial Class CodeGen
         Me.JSONWS.Text = "JSON WS"
         Me.JSONWS.UseVisualStyleBackColor = True
         '
+        'GroupBox7
+        '
+        Me.GroupBox7.Controls.Add(Me.rtbJsonString)
+        Me.GroupBox7.Controls.Add(Me.Label11)
+        Me.GroupBox7.Controls.Add(Me.txtJsonKey)
+        Me.GroupBox7.Controls.Add(Me.txtJsonObjectName)
+        Me.GroupBox7.Controls.Add(Me.Label9)
+        Me.GroupBox7.Controls.Add(Me.Label10)
+        Me.GroupBox7.Controls.Add(Me.txtJsonParserName)
+        Me.GroupBox7.Location = New System.Drawing.Point(4, 4)
+        Me.GroupBox7.Name = "GroupBox7"
+        Me.GroupBox7.Size = New System.Drawing.Size(494, 283)
+        Me.GroupBox7.TabIndex = 7
+        Me.GroupBox7.TabStop = False
+        Me.GroupBox7.Text = "WS String"
+        '
+        'rtbJsonString
+        '
+        Me.rtbJsonString.Location = New System.Drawing.Point(6, 19)
+        Me.rtbJsonString.Name = "rtbJsonString"
+        Me.rtbJsonString.Size = New System.Drawing.Size(482, 178)
+        Me.rtbJsonString.TabIndex = 0
+        Me.rtbJsonString.Text = ""
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(6, 258)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(69, 13)
+        Me.Label11.TabIndex = 6
+        Me.Label11.Text = "Object Name"
+        '
+        'txtJsonKey
+        '
+        Me.txtJsonKey.Location = New System.Drawing.Point(87, 203)
+        Me.txtJsonKey.Name = "txtJsonKey"
+        Me.txtJsonKey.Size = New System.Drawing.Size(100, 20)
+        Me.txtJsonKey.TabIndex = 1
+        '
+        'txtJsonObjectName
+        '
+        Me.txtJsonObjectName.Location = New System.Drawing.Point(87, 255)
+        Me.txtJsonObjectName.Name = "txtJsonObjectName"
+        Me.txtJsonObjectName.Size = New System.Drawing.Size(100, 20)
+        Me.txtJsonObjectName.TabIndex = 5
+        '
         'Label9
         '
         Me.Label9.AutoSize = True
@@ -384,20 +420,21 @@ Partial Class CodeGen
         Me.Label9.TabIndex = 2
         Me.Label9.Text = "WS Key"
         '
-        'txtJsonKey
+        'Label10
         '
-        Me.txtJsonKey.Location = New System.Drawing.Point(87, 203)
-        Me.txtJsonKey.Name = "txtJsonKey"
-        Me.txtJsonKey.Size = New System.Drawing.Size(100, 20)
-        Me.txtJsonKey.TabIndex = 1
+        Me.Label10.AutoSize = True
+        Me.Label10.Location = New System.Drawing.Point(6, 232)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(68, 13)
+        Me.Label10.TabIndex = 4
+        Me.Label10.Text = "Parser Name"
         '
-        'rtbJsonString
+        'txtJsonParserName
         '
-        Me.rtbJsonString.Location = New System.Drawing.Point(6, 19)
-        Me.rtbJsonString.Name = "rtbJsonString"
-        Me.rtbJsonString.Size = New System.Drawing.Size(482, 178)
-        Me.rtbJsonString.TabIndex = 0
-        Me.rtbJsonString.Text = ""
+        Me.txtJsonParserName.Location = New System.Drawing.Point(87, 229)
+        Me.txtJsonParserName.Name = "txtJsonParserName"
+        Me.txtJsonParserName.Size = New System.Drawing.Size(100, 20)
+        Me.txtJsonParserName.TabIndex = 3
         '
         'btnGenerate
         '
@@ -437,54 +474,6 @@ Partial Class CodeGen
         Me.LinkLabel3.TabIndex = 9
         Me.LinkLabel3.TabStop = True
         Me.LinkLabel3.Text = "Save to Output"
-        '
-        'Label10
-        '
-        Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(6, 232)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(68, 13)
-        Me.Label10.TabIndex = 4
-        Me.Label10.Text = "Parser Name"
-        '
-        'txtJsonParserName
-        '
-        Me.txtJsonParserName.Location = New System.Drawing.Point(87, 229)
-        Me.txtJsonParserName.Name = "txtJsonParserName"
-        Me.txtJsonParserName.Size = New System.Drawing.Size(100, 20)
-        Me.txtJsonParserName.TabIndex = 3
-        '
-        'Label11
-        '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(6, 258)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(69, 13)
-        Me.Label11.TabIndex = 6
-        Me.Label11.Text = "Object Name"
-        '
-        'txtJsonObjectName
-        '
-        Me.txtJsonObjectName.Location = New System.Drawing.Point(87, 255)
-        Me.txtJsonObjectName.Name = "txtJsonObjectName"
-        Me.txtJsonObjectName.Size = New System.Drawing.Size(100, 20)
-        Me.txtJsonObjectName.TabIndex = 5
-        '
-        'GroupBox7
-        '
-        Me.GroupBox7.Controls.Add(Me.rtbJsonString)
-        Me.GroupBox7.Controls.Add(Me.Label11)
-        Me.GroupBox7.Controls.Add(Me.txtJsonKey)
-        Me.GroupBox7.Controls.Add(Me.txtJsonObjectName)
-        Me.GroupBox7.Controls.Add(Me.Label9)
-        Me.GroupBox7.Controls.Add(Me.Label10)
-        Me.GroupBox7.Controls.Add(Me.txtJsonParserName)
-        Me.GroupBox7.Location = New System.Drawing.Point(4, 4)
-        Me.GroupBox7.Name = "GroupBox7"
-        Me.GroupBox7.Size = New System.Drawing.Size(494, 283)
-        Me.GroupBox7.TabIndex = 7
-        Me.GroupBox7.TabStop = False
-        Me.GroupBox7.Text = "WS String"
         '
         'CodeGen
         '
@@ -539,7 +528,6 @@ Partial Class CodeGen
     Friend WithEvents Label2 As Label
     Friend WithEvents InputWithList As TabPage
     Friend WithEvents JSONWS As TabPage
-    Friend WithEvents InputWithoutList As TabPage
     Friend WithEvents GroupBox1 As GroupBox
     Friend WithEvents RichTextBox1 As RichTextBox
     Friend WithEvents Label5 As Label

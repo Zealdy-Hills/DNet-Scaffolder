@@ -2,6 +2,8 @@
 Imports System.Diagnostics.Eventing.Reader
 Imports System.Reflection
 Imports System.Text
+Imports System.Linq
+Imports System.Web.Script.Serialization
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports System.Xml
 Imports Newtonsoft
@@ -14,6 +16,7 @@ Public Class CodeGen
     Private vbCode As String
     Private njwsCode As String
     Private njwsKey As String
+    Private jwsCode As String
     Private liControl As List(Of String)
     Private liGridCmd As List(Of String)
 
@@ -24,8 +27,11 @@ Public Class CodeGen
     Const INDICATOR_DETAIL As String = "D"
     Const INDICATOR_DETAIL_CHILD As String = "DD"
 
+    Const Ver As String = "0.7"
+
     Private Sub CodeGen_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        TabControl1.SelectedIndex = 3
+        Me.Text = "D-Net Scaffolder " & Ver
+        'TabControl1.SelectedIndex = 2
         ControlTabs()
         txtOutputFolder.Enabled = False
     End Sub
@@ -58,7 +64,6 @@ Public Class CodeGen
         Select Case TabControl1.SelectedTab.Name
             Case "InputWithList"
                 GeneratePageInputWithList()
-            Case "InputWithoutList"
             Case "NonJsonWS"
                 GenerateNJWS()
             Case "JSONWS"
@@ -82,7 +87,6 @@ Public Class CodeGen
         Select Case TabControl1.SelectedTab.Name
             Case "InputWithList"
                 InitiateControlIWL()
-            Case "InputWithoutList"
             Case "NonJsonWS"
                 InitiateControlNJWS()
             Case "JSONWS"
@@ -112,7 +116,8 @@ Public Class CodeGen
 #Region "JSON WS"
     Private Sub InitiateControlJWS()
         'rtbJsonString.Text = "[{""SONumber"":""7580072892"",""Detail"":[{""PartNumber"":""4250D596"",""PartName"":""WHEEL,DISC 18"",""Qty"":""1"",""Reason"":""Z9""}]},{""SONumber"":""7580072893"",""Detail"":[{""PartNumber"":""4250D593"",""PartName"":""WHEEL,DISC 19"",""Qty"":""3"",""Reason"":""Z7""}]"
-        rtbJsonString.Text = "{""sonumber"":""7580072892"",""detail"":[{""partnumber"":""4250d596"",""partname"":""wheel,disc 18"",""qty"":""1"",""reason"":""z9""}]}"
+        rtbJsonString.Text = "{""LetterNo"":""008/PROM-689/02/23"",""Iklan"":[{""MediaBroadcastPeriodBegin"":""2023-02-01T00:00:00"",""MediaBroadcastPeriodEnd"":""2023-02-28T00:00:00"",""MediaDetails"":[{""Media"":""Service Campaign 10k"",""MediaName"":""Mothers Day""}],""DealerName"":""SUN STAR MOTOR, PT.""}],""ProposalCode"":""I022300016""}"
+        'rtbJsonString.Text = "{""LetterNo"":""008/PROM-689/02/23"",""ProposalCode"":""I022300016"",""MediaBroadcastPeriodBegin"":""2023-02-01T00:00:00"",""MediaBroadcastPeriodEnd"":""2023-02-28T00:00:00"",""Media"":""Service Campaign 10k"",""MediaName"":""Mothers Day"",""DealerName"":""SUN STAR MOTOR, PT.""}"
         'rtbJsonString.Text = "{""SONumber"":""7580072892"",""Detail"":[""4250D596"",""WHEEL,DISC 18"",""Z9""]}"
         txtJsonKey.Text = "SOCANCEL"
         txtJsonParserName.Text = "SOCancelJsonParser"
@@ -122,44 +127,46 @@ Public Class CodeGen
     End Sub
 
     Private Sub GenerateJWS()
+        'Construct Json Class
+        Dim jss As New JavaScriptSerializer()
+        Dim dict As Dictionary(Of Object, Object) = jss.Deserialize(Of Dictionary(Of Object, Object))(rtbJsonString.Text.Trim)
+        Dim sortDict As New Dictionary(Of String, String)
+        For Each item As KeyValuePair(Of Object, Object) In dict
+            sortDict.Add(item.Key, item.Value.GetType.Name)
+        Next
+
+        'Dim pack As New StringBuilder
+        'Dim current As String = txtJsonObjectName.Text
+        'jsonSearch(current, dict, pack)
+
+        'Construct Parser
         Dim ConStr As New ConStrJSONWS()
-        Dim a = JsonConvert.DeserializeObject(Of Object)(rtbJsonString.Text)
-        If a.GetType() = GetType(JObject) Then
-            Dim b As JObject = a
-            Dim _RootDictionary As New Dictionary(Of String, Object)
-            Dim _ChildDictionary As New Dictionary(Of String, String)
-            For Each item As JProperty In b.Properties
-                _RootDictionary.Add(item.Name, item.Value.GetType().ToString())
-            Next
+        Dim parserStr As String = ConStr.strJsonParser
+        Dim ClassObjStr As String = String.Format(ConStr.strClass, txtJsonObjectName.Text)
+        Dim NamespaceStr As String = String.Format(ConStr.strNamespace, ClassObjStr)
+        jwsCode = String.Format(parserStr, txtJsonParserName.Text, txtJsonObjectName.Text, txtJsonObjectName.Text.Replace("Json", ""), NamespaceStr)
 
-            ParseChild(_RootDictionary, _ChildDictionary)
-        Else
-
-        End If
+        'Dim cla As String = String.Format(ConStr.strClass, txtJsonObjectName.Text, pack.ToString())
+        'Dim q As String = pack.ToString()
+        Dim debug = ""
     End Sub
 
-    Private Sub ParseChild(_rootDictionary As Dictionary(Of String, Object), ByRef _childDictionary As Dictionary(Of String, String))
-
-        For Each item As KeyValuePair(Of String, Object) In _rootDictionary
-            Select Case item.Value
-                Case GetType(JArray).ToString()
-                    For Each child As String In item.Value
-                        If child = GetType(JObject).ToString() Then 'Schema 2
-                            If child.Count > 0 Then
-                                For Each childProp As JProperty In child
-                                Next
-                            End If
-                        Else 'Schema 3 --- JValue
-                            '_ChildDictionary.Add(child.name
-                            Dim qwe = ""
-                        End If
-                        Dim debugs = ""
-                    Next
-
-
-                Case GetType(JValue).ToString()
-
-            End Select
+    Private Sub jsonSearch(currentClass As String, dict As Dictionary(Of Object, Object), ByRef pack As StringBuilder)
+        For Each keys In dict.Keys
+            If dict(keys).GetType.Name = "Object[]" Then
+                jsonSearchChild(keys, dict(keys), pack)
+            Else
+                pack.AppendLine("Public " & keys & " As " & dict(keys).GetType.Name)
+            End If
+        Next
+    End Sub
+    Private Sub jsonSearchChild(currentClass As String, dict As Object, ByRef pack As StringBuilder)
+        For Each keys In dict
+            If dict(keys).GetType.Name = "Object[]" Then
+                jsonSearchChild(keys, dict(keys), pack)
+            Else
+                pack.AppendLine("Public " & keys & " As " & dict(keys).GetType.Name)
+            End If
         Next
     End Sub
 #End Region
@@ -298,13 +305,22 @@ Public Class CodeGen
     End Sub
 
     Private Sub GenerateVBCodeInputWithList()
+        Dim withList As Boolean = If(RichTextBox2.TextLength = 0, False, True)
         Dim ConStr As New ConStrInputWithList()
         Dim BaseStr As String = ConStr.VBInputWithList
+        If Not withList Then
+            BaseStr = ConStr.VBInputWithoutList
+        End If
     End Sub
 
     Private Sub GenerateASPXPageInputWithList()
+        Dim withList As Boolean = If(RichTextBox2.TextLength = 0, False, True)
         Dim ConStr As New ConStrInputWithList()
         Dim BaseStr As String = ConStr.InputWithList
+        If Not withList Then
+            BaseStr = ConStr.InputWithoutList
+        End If
+
         Dim buildCtrl As String = String.Empty
         Dim buildGridColumn As String = String.Empty
         Dim buildGridColumnButtons As Boolean = False
@@ -415,3 +431,22 @@ Public Class CodeGen
 #End Region
 
 End Class
+
+Public Class Rootobject
+    Public Property LetterNo As String
+    Public Property ProposalCode As String
+    Public Property Iklan() As Iklan
+End Class
+
+Public Class Iklan
+    Public Property MediaBroadcastPeriodBegin As Date
+    Public Property MediaBroadcastPeriodEnd As Date
+    Public Property MediaDetails() As Mediadetail
+    Public Property DealerName As String
+End Class
+
+Public Class Mediadetail
+    Public Property Media As String
+    Public Property MediaName As String
+End Class
+
