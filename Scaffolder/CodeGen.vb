@@ -28,7 +28,7 @@ Public Class CodeGen
     Const INDICATOR_DETAIL_CHILD As String = "DD"
 
     Private jsonArrType As New ArrayList
-    Const Ver As String = "1.1"
+    Const Ver As String = "1.1.1"
 
     Private Sub CodeGen_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Text = "D-Net Scaffolder " & Ver
