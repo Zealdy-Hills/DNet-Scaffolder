@@ -1,4 +1,16 @@
 ﻿Public Class ConStrJSONWS
+    Public SysLogStr As String = "'Add to SyslogParameter.vb
+'{0}Parser
+"
+    Public JsonWorker1 As String = "'Add to JSONWorker.vb  Region ""Declare Parser""
+'Private _{0}Parser As {0}Parser
+"
+    '0=WS Key, 1=Var Parser Name
+    Public JsonWorker2 As String = "'Add to JSONWorker.vb  Function Distribute()
+'Case ""{0}""
+ '_{1}Parser = New {1}Parser()
+'Return _{1}Parser.ParseWithTransactionWS(KeyName, content, msg)
+"
     '0=Filename, 1=Json Class, 2=Facade(substring Json from Json Class), 3=Copas Json Class
     Public strJsonParser As String = "#Region "".NET Base Class Namespace Imports""
 Imports System.Text
@@ -52,7 +64,7 @@ Namespace KTB.DNet.Parser
                 msg = String.Empty
                 jsonData = JsonConvert.DeserializeObject(Of List(Of {1}))(Content)
             Catch ex As Exception
-                SysLogParameter.LogErrorToSyslog(ex.Message.ToString, ""json-worker"", ""{0}.vb"", ""Parsing"", KTB.DNet.[Lib].DNetLogFormatStatus.Direct, SourceName, SysLogParameter.ParserType.{0}, BlockName)
+                SysLogParameter.LogErrorToSyslog(ex.Message.ToString, ""json-worker"", ""{0}Parser.vb"", ""Parsing"", KTB.DNet.[Lib].DNetLogFormatStatus.Direct, SourceName, SysLogParameter.ParserType.{0}Parser, BlockName)
                 Dim e As Exception = New Exception(KeyName & Chr(13) & Chr(10) & Chr(13) & Chr(10) & ex.Message)
                 Dim rethrow As Boolean = ExceptionPolicy.HandleException(e, ""Parser Policy"")
                 jsonData = Nothing
@@ -74,7 +86,7 @@ Namespace KTB.DNet.Parser
                             ' _{2}Facade = New {2}Facade(New System.Security.Principal.GenericPrincipal(New GenericIdentity(""WSJson""), Nothing))
                             ' _{2}Facade.Update(_{2}, {2}Details)
                         Catch ex As Exception
-                            SysLogParameter.LogErrorToSyslog(ex.Message.ToString, ""WSJson-worker"", ""{0}.vb"", ""Transaction"", KTB.DNet.[Lib].DNetLogFormatStatus.Direct, SourceName, SysLogParameter.ParserType.{0})
+                            SysLogParameter.LogErrorToSyslog(ex.Message.ToString, ""WSJson-worker"", ""{0}Parser.vb"", ""Transaction"", KTB.DNet.[Lib].DNetLogFormatStatus.Direct, SourceName, SysLogParameter.ParserType.{0}Parser)
                             Dim e As Exception = New Exception(""{2}"" & Chr(13) & Chr(10) & ex.Message)
                             If ex.Message.Substring(0, 3) = ""O/C"" Then
                                 Throw New System.Exception(""O/C status in D-NET is not locked. Update failed."")
@@ -107,8 +119,11 @@ End Namespace"
 
     '0=Class Name
     Public strClass As String = "    Public Class {0}
-        'Copy Json String And Edit > Paste Special Here
+        {1}Public ErrorMessage As String
     End Class"
+
+    '0=Property Name, 1=Type
+    Public strProperty As String = "        Public {0} As {1}"
     Public Sub New()
     End Sub
 End Class

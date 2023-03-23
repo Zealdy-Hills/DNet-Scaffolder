@@ -27,11 +27,12 @@ Public Class CodeGen
     Const INDICATOR_DETAIL As String = "D"
     Const INDICATOR_DETAIL_CHILD As String = "DD"
 
-    Const Ver As String = "0.7"
+    Private jsonArrType As New ArrayList
+    Const Ver As String = "1.0"
 
     Private Sub CodeGen_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Text = "D-Net Scaffolder " & Ver
-        'TabControl1.SelectedIndex = 2
+        TabControl1.SelectedIndex = 2
         ControlTabs()
         txtOutputFolder.Enabled = False
     End Sub
@@ -115,60 +116,102 @@ Public Class CodeGen
 
 #Region "JSON WS"
     Private Sub InitiateControlJWS()
-        'rtbJsonString.Text = "[{""SONumber"":""7580072892"",""Detail"":[{""PartNumber"":""4250D596"",""PartName"":""WHEEL,DISC 18"",""Qty"":""1"",""Reason"":""Z9""}]},{""SONumber"":""7580072893"",""Detail"":[{""PartNumber"":""4250D593"",""PartName"":""WHEEL,DISC 19"",""Qty"":""3"",""Reason"":""Z7""}]"
-        rtbJsonString.Text = "{""LetterNo"":""008/PROM-689/02/23"",""Iklan"":[{""MediaBroadcastPeriodBegin"":""2023-02-01T00:00:00"",""MediaBroadcastPeriodEnd"":""2023-02-28T00:00:00"",""MediaDetails"":[{""Media"":""Service Campaign 10k"",""MediaName"":""Mothers Day""}],""DealerName"":""SUN STAR MOTOR, PT.""}],""ProposalCode"":""I022300016""}"
+        rtbJsonString.Text = "[{""CampaignCode"":""IIMS"",""CampaignName"":""INDONESIA MOTOR SHOW"",""CampaignValidFrom"":""20/03/2023"",""CampaignValidTo"":""05/03/2023"",""DeletionFlag"":"""",""Detail"":[{""DealerCode"":""100001"",""Part"":[{""PartNumber"":""MZ321042L"",""Discount"":""10"",""MinQty"":""50"",""MaxQty"":""100""},{""PartNumber"":""MZ321042K"",""Discount"":""10"",""MinQty"":""50"",""MaxQty"":""100""}]},{""DealerCode"":""100002"",""Part"":[{""PartNumber"":""MZ321042L"",""Discount"":""10"",""MinQty"":""50"",""MaxQty"":""100""},{""PartNumber"":""MZ321042K"",""Discount"":""10"",""MinQty"":""50"",""MaxQty"":""100""}]}]}]"
+        'rtbJsonString.Text = "[{""CampaignCode"":""IIMS"",""CampaignName"":""INDONESIA MOTOR SHOW"",""CampaignValidFrom"":""20/03/2023"",""CampaignValidTo"":""05/03/2023"",""DeletionFlag"":"""",""Detail"":[{""DealerCode"":""100001"",""PartNumber"":""MZ321042L"",""Discount"":""10"",""MinQty"":""50"",""MaxQty"":""100""},{""DealerCode"":""100001"",""PartNumber"":""MZ321042L"",""Discount"":""10"",""MinQty"":""50"",""MaxQty"":""100""}]}]"
         'rtbJsonString.Text = "{""LetterNo"":""008/PROM-689/02/23"",""ProposalCode"":""I022300016"",""MediaBroadcastPeriodBegin"":""2023-02-01T00:00:00"",""MediaBroadcastPeriodEnd"":""2023-02-28T00:00:00"",""Media"":""Service Campaign 10k"",""MediaName"":""Mothers Day"",""DealerName"":""SUN STAR MOTOR, PT.""}"
         'rtbJsonString.Text = "{""SONumber"":""7580072892"",""Detail"":[""4250D596"",""WHEEL,DISC 18"",""Z9""]}"
-        txtJsonKey.Text = "SOCANCEL"
-        txtJsonParserName.Text = "SOCancelJsonParser"
-        txtJsonObjectName.Text = "SOCancelJson"
+        txtJsonKey.Text = "CAMPAIGNDEALER"
+        txtJsonParserName.Text = "MasterCampaignJson"
+        txtJsonObjectName.Text = "CampaignDealerJson"
         LinkLabel1.Visible = False
         LinkLabel2.Visible = True
     End Sub
 
     Private Sub GenerateJWS()
+#Region "OLD"
         'Construct Json Class
-        Dim jss As New JavaScriptSerializer()
-        Dim dict As Dictionary(Of Object, Object) = jss.Deserialize(Of Dictionary(Of Object, Object))(rtbJsonString.Text.Trim)
-        Dim sortDict As New Dictionary(Of String, String)
-        For Each item As KeyValuePair(Of Object, Object) In dict
-            sortDict.Add(item.Key, item.Value.GetType.Name)
-        Next
+        'Dim jss As New JavaScriptSerializer()
+        'Dim dict As Dynamic.DynamicObject = jss.Deserialize(Of Dynamic.DynamicObject)(rtbJsonString.Text.Trim)
+        'Dim debug = ""
+        'Dim dict As Dictionary(Of Object, Object) = jss.Deserialize(Of Dictionary(Of Object, Object))(rtbJsonString.Text.Trim)
+        'Dim sortDict As New Dictionary(Of String, String)
+        'For Each item As List(Of KeyValuePair(Of String, String)) In dict
+        '    sortDict.Add(item.Key, item.Value.GetType.Name)
+        'Next
 
         'Dim pack As New StringBuilder
         'Dim current As String = txtJsonObjectName.Text
         'jsonSearch(current, dict, pack)
-
-        'Construct Parser
+#End Region
         Dim ConStr As New ConStrJSONWS()
+        'Dim json1 As String = "[{""CampaignCode"":""IIMS"",""CampaignName"":""INDONESIA MOTOR SHOW"",""CampaignValidFrom"":""20/03/2023"",""CampaignValidTo"":""05/03/2023"",""DeletionFlag"":"""",""Detail"":[{""DealerCode"":""100001"",""Part"":[{""PartNumber"":""MZ321042L"",""Discount"":""10"",""MinQty"":""50"",""MaxQty"":""100""}]}]}]"
+        Dim jsonV = JsonConvert.DeserializeObject(rtbJsonString.Text)
+
+        Dim classString As String = String.Empty
+        Select Case jsonV.GetType()
+            Case GetType(JObject)
+                parseJsonObject(jsonV)
+            Case GetType(JArray)
+                parseJsonArray(jsonV)
+            Case Else
+                MessageBox.Show("Unreadble JSON")
+        End Select
+
+
+        Dim build As List(Of String) = jsonArrType.Cast(Of String).ToList
+        classString = String.Format(ConStr.strNamespace, String.Join(vbLf, build)) & vbLf
+        BuildFooterJWS(classString, ConStr)
+        'Construct Parser
         Dim parserStr As String = ConStr.strJsonParser
-        Dim ClassObjStr As String = String.Format(ConStr.strClass, txtJsonObjectName.Text)
-        Dim NamespaceStr As String = String.Format(ConStr.strNamespace, ClassObjStr)
-        jwsCode = String.Format(parserStr, txtJsonParserName.Text, txtJsonObjectName.Text, txtJsonObjectName.Text.Replace("Json", ""), NamespaceStr)
+        jwsCode = String.Format(parserStr, txtJsonParserName.Text, txtJsonObjectName.Text, txtJsonObjectName.Text.Replace("Json", ""), classString)
 
-        'Dim cla As String = String.Format(ConStr.strClass, txtJsonObjectName.Text, pack.ToString())
-        'Dim q As String = pack.ToString()
-        Dim debug = ""
+        MessageBox.Show("Code Ready to Copy", "Alert")
     End Sub
 
-    Private Sub jsonSearch(currentClass As String, dict As Dictionary(Of Object, Object), ByRef pack As StringBuilder)
-        For Each keys In dict.Keys
-            If dict(keys).GetType.Name = "Object[]" Then
-                jsonSearchChild(keys, dict(keys), pack)
-            Else
-                pack.AppendLine("Public " & keys & " As " & dict(keys).GetType.Name)
-            End If
-        Next
+    Private Sub BuildFooterJWS(ByRef jWSFooter As String, ConStr As ConStrJSONWS)
+        jWSFooter &= String.Format(ConStr.SysLogStr, txtJsonParserName.Text) & vbLf
+        jWSFooter &= String.Format(ConStr.JsonWorker1, txtJsonParserName.Text) & vbLf
+        jWSFooter &= String.Format(ConStr.JsonWorker2, txtJsonKey.Text.ToUpper, txtJsonParserName.Text) & vbLf
     End Sub
-    Private Sub jsonSearchChild(currentClass As String, dict As Object, ByRef pack As StringBuilder)
-        For Each keys In dict
-            If dict(keys).GetType.Name = "Object[]" Then
-                jsonSearchChild(keys, dict(keys), pack)
-            Else
-                pack.AppendLine("Public " & keys & " As " & dict(keys).GetType.Name)
+
+    Private Sub parseJsonObject(jsonV As Object, Optional className As String = "")
+        Dim ConStr As New ConStrJSONWS()
+        Dim strBuildder As New StringBuilder
+        Dim strProp = ConStr.strProperty
+        className = If(className = "", txtJsonObjectName.Text, className)
+        Dim json As JObject = jsonV
+        If json.Children.Count > 0 Then
+            For Each jData As JProperty In json.Children.Where(Function(x As JProperty) x.Value.Type.ToString <> GetType(Array).Name)
+                Dim consProp As String = String.Empty
+                consProp = String.Format(strProp, "_" & jData.Name, jData.Value.Type)
+                strBuildder.AppendLine(consProp)
+            Next
+            For Each jData As JProperty In json.Children.Where(Function(x As JProperty) x.Value.Type.ToString = GetType(Array).Name)
+                Dim consProp As String = String.Empty
+                consProp = String.Format(strProp, "_" & jData.Name, "List(Of " & jData.Name & ")")
+                strBuildder.AppendLine(consProp)
+                Dim ClassObjStr1 As String = String.Format(ConStr.strClass, className, strBuildder.ToString)
+                If Not jsonArrType.Contains(ClassObjStr1) Then
+                    jsonArrType.Add(ClassObjStr1)
+                End If
+                parseJsonObject(CType(jData.Value.First, JObject), jData.Name)
+            Next
+            Dim ClassObjStr As String = String.Format(ConStr.strClass, className, strBuildder.ToString)
+            If Not jsonArrType.Contains(ClassObjStr) Then
+                jsonArrType.Add(ClassObjStr)
             End If
-        Next
+        End If
     End Sub
+
+    Private Sub parseJsonArray(jsonV As Object)
+        Dim json As JArray = jsonV
+        If json.Children.Count > 0 Then
+            For Each jData As JObject In json
+                parseJsonObject(jData)
+            Next
+        End If
+    End Sub
+
 #End Region
 
 #Region "Non JSON WS"
@@ -424,6 +467,9 @@ Public Class CodeGen
             Case "NonJsonWS"
                 Clipboard.SetText(njwsCode)
                 MessageBox.Show("Code Copied to Clipboard", "Alert")
+            Case "JSONWS"
+                Clipboard.SetText(jwsCode)
+                MessageBox.Show("Code Copied to Clipboard", "Alert")
             Case Else
                 MessageBox.Show("Not Yet Implemented", "Alert")
         End Select
@@ -431,22 +477,3 @@ Public Class CodeGen
 #End Region
 
 End Class
-
-Public Class Rootobject
-    Public Property LetterNo As String
-    Public Property ProposalCode As String
-    Public Property Iklan() As Iklan
-End Class
-
-Public Class Iklan
-    Public Property MediaBroadcastPeriodBegin As Date
-    Public Property MediaBroadcastPeriodEnd As Date
-    Public Property MediaDetails() As Mediadetail
-    Public Property DealerName As String
-End Class
-
-Public Class Mediadetail
-    Public Property Media As String
-    Public Property MediaName As String
-End Class
-
