@@ -28,11 +28,11 @@ Public Class CodeGen
     Const INDICATOR_DETAIL_CHILD As String = "DD"
 
     Private jsonArrType As New ArrayList
-    Const Ver As String = "1.0"
+    Const Ver As String = "1.1"
 
     Private Sub CodeGen_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Text = "D-Net Scaffolder " & Ver
-        TabControl1.SelectedIndex = 2
+        'TabControl1.SelectedIndex = 2
         ControlTabs()
         txtOutputFolder.Enabled = False
     End Sub
